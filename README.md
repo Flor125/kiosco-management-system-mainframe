@@ -25,7 +25,7 @@ Currently, the project is in the **architecture design** and **technical documen
 
 ## 4. Author 👩‍💻
 
-* **Florencia Sombra** - [LinkedIn](https://www.linkedin.com/in/tu-perfil-tuneado)
+* **Florencia Sombra** - [LinkedIn](https://www.linkedin.com/in/flor125)
 
 
 
@@ -58,4 +58,4 @@ Actualmente, el proyecto se encuentra en la fase de **diseño de arquitectura** 
 
 ## 4. Autor 👩‍💻
 
-* **Florencia Sombra** - [LinkedIn](https://www.linkedin.com/in/tu-perfil-tuneado)
+* **Florencia Sombra** - [LinkedIn](https://www.linkedin.com/in/flor125)
