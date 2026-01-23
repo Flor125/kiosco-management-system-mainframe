@@ -36,7 +36,7 @@ Due to compilation constraints in the s390x environment (GnuCOBOL without Enterp
 
 ## 📸 Screenshots
 
-## 📱 Mobile UI
+
 *Mobile-first* design optimized for kiosk operators.
 
 | Access & Security | Main Dashboard |
@@ -104,7 +104,6 @@ Debido a limitaciones de compilación en el entorno s390x (GnuCOBOL sin precompi
 
 ## 📸 Screenshots
 
-## 📱 Interfaz Móvil (Mobile UI)
 Diseño *mobile-first* optimizado para operarios de kiosco.
 
 | Acceso y Seguridad | Panel Principal |
