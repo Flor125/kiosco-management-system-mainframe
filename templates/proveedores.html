@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/main.css') }}">
+    <link href='https://cdn.boxicons.com/fonts/basic/boxicons.min.css' rel='stylesheet'>
+    <title>Proveedores | Gestion de Kioscos</title>
+    
+    <style>
+        .form-container {
+            width: 90%; margin: 20px auto; padding: 15px;
+            background-color: #ffffff; border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .form-container h2 { text-align: center; margin-bottom: 20px; color: #333; }
+        
+        .input-field-container { margin-bottom: 15px; }
+        .input-field-container label {
+            display: block; margin-bottom: 5px; font-weight: 600;
+            color: #555; font-size: 14px;
+        }
+        .input-field-container input {
+            width: 100%; padding: 10px; border: 1px solid #ddd;
+            border-radius: 5px; font-size: 16px; box-sizing: border-box;
+        }
+        .submit-button {
+            width: 100%; padding: 12px; background-color: #367cff;
+            color: white; border: none; border-radius: 5px;
+            font-size: 16px; font-weight: bold; cursor: pointer;
+        }
+        
+        /* Estilos para la tabla (usando tus clases) */
+        .table-producto {
+            justify-content: center; width: 90%; margin: 20px auto;
+            border-collapse: collapse; font-family: Arial, sans-serif;
+        }
+        .table-producto th, .table-producto td {
+            padding: 12px 15px; border: 1px solid #ddd; text-align: left;
+        }
+        .table-producto th { background-color: #f4f4f4; font-weight: bold; }
+
+    </style>
+</head>
+<body>
+    <div id="pc-blocker">
+        </div>
+
+    <div id="mobile-app"> 
+        <header class="app-header">
+            <div class="header-icon js-navegacion" data-url="{{ url_for('main_jefe') }}">
+                <i class='bx bx-arrow-back'></i>
+            </div>
+            <div class="header-greeting">
+                Proveedores
+            </div>
+            <div class="header-icon">
+                <i class='bx bx-user-circle'></i> 
+            </div>
+        </header>
+
+        <main class="dashboard-body">
+
+            <div class="form-container">
+                <h2>Registrar Nuevo Proveedor</h2>
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                  {% if messages %}
+                    {% for category, message in messages %}
+                      <div class="flash-message flash-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                  {% endif %}
+                {% endwith %}
+
+                <form action="{{ url_for('agregar_proveedor') }}" method="POST">
+                    
+                    <div class="input-field-container">
+                        <label for="razon_social">Razón Social:</label>
+                        <input type="text" id="razon_social" name="razon_social" required>
+                    </div>
+
+                    <div class="input-field-container">
+                        <label for="cuit">CUIT (sin guiones):</label>
+                        <input type="text" id="cuit" name="cuit" required>
+                    </div>
+
+                    <div class="input-field-container">
+                        <label for="telefono">Teléfono:</label>
+                        <input type="tel" id="telefono" name="telefono" required>
+                    </div>
+                    
+                    <button type="submit" class="submit-button">Guardar Proveedor</button>
+                </form>
+            </div>
+
+            <div class="table-producto">
+                <h2>Lista de Proveedores</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Razón Social</th>
+                            <th>CUIT</th>
+                            <th>Teléfono</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if proveedores %}
+                            {% for p in proveedores %}
+                            <tr>
+                                <td>{{ p.razon_social }}</td>
+                                <td>{{ p.cuit }}</td>
+                                <td>{{ p.telefono }}</td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="3" style="text-align: center;">No hay proveedores registrados.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+
+        </main>
+
+        <div class="navbar">
+            <div class="effect"></div>
+
+            <button data-url="{{ url_for('main_screen') }}">
+                <i class='bx bx-home'></i>
+                <span>Inicio</span>
+            </button>
+
+            <button data-url="{{ url_for('producto_page') }}">
+                <i class='bx bxs-box'></i>
+                <span>Productos</span>
+            </button>
+
+            <button class="plus scanner-btn"
+                    data-url="{{ url_for('scanner_page') }}">
+                <i class='bx bxs-scan-barcode'></i>
+                <span>Escaner</span>
+            </button>
+
+            <button data-url="{{ url_for('precios_page') }}">
+                <i class='bx bxs-file-report'></i>
+                <span>Precios</span>
+            </button>
+
+            <button data-url="{{ url_for('ajustes_page') }}">
+                <i class='bx bxs-cog'></i>
+                <span>Ajustes</span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- Botón del escáner (de la Navbar) ---
+            const scannerBtn = document.querySelector('.scanner-btn'); 
+            scannerBtn?.addEventListener('click', function() {
+                const url = this.getAttribute('data-url'); 
+                if (url) window.location.href = url;
+            });
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="{{ url_for('static', filename='javascript/main.js') }}" type="text/javascript"></script>
+</body>
+</html>

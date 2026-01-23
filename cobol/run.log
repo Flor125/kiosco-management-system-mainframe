@@ -1,0 +1,7 @@
+[2025-11-21 05:03:55] [INFO] Ejecutando batchcosto...
+--- INICIO BATCH COBOL (BATCHCOSTOS) ---
+--- INICIO PROCESAMIENTO DE COSTOS ---
+
+caught signal (signal SIGINT)
+
+libcob: warning: implicit CLOSE of HISTORICO-OUT-FILE ('historico.dat')

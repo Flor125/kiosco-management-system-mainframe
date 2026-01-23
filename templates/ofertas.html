@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='styles/main.css') }}">
+    <link href="https://cdn.boxicons.com/fonts/basic/boxicons.min.css"
+          rel="stylesheet">
+    <title>Ofertas | Gestión de Kioscos</title>
+    <style>
+    .table-ofertas{
+        width: 90%;
+        margin: 20px auto;
+        font-family: Arial, sans-serif;
+        max-height: calc(100vh - 200px);
+        overflow: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    .table-ofertas table{
+        width:100%;
+        border-collapse: collapse;
+        min-width: 500px;
+    }
+    .table-ofertas th,
+    .table-ofertas td{
+        padding: 10px 12px;
+        border:1px solid #ddd;
+        text-align:left;
+        vertical-align: top;
+        font-size: 14px;
+    }
+    .table-ofertas thead th{
+        background:#f4f4f4;
+        position: sticky;
+        top:0;
+        z-index:2;
+    }
+    .btn-ver-detalle{
+        background:#367cff;
+        color:#fff;
+        border:none;
+        padding:6px 10px;
+        border-radius:4px;
+        font-size: 13px;
+        cursor:pointer;
+    }
+    .oferta-detalle-row{
+        background:#fafafa;
+    }
+    .oferta-detalle-panel{
+        font-size:13px;
+    }
+    .oferta-detalle-panel table{
+        width:100%;
+        border-collapse: collapse;
+        margin-top:6px;
+    }
+    .oferta-detalle-panel th,
+    .oferta-detalle-panel td{
+        padding:4px 6px;
+        border:1px solid #ddd;
+        font-size:12px;
+    }
+    </style>
+</head>
+<body>
+<div id="pc-blocker">
+    <h1>Lo sentimos</h1>
+    <p>Esta aplicación está optimizada solo para dispositivos móviles.</p>
+    <p>Por favor, ingrese desde su celular.</p>
+</div>
+
+<div id="mobile-app">
+    <header class="app-header">
+        <div class="header-icon">
+            <i class='bx bx-user-circle'></i>
+        </div>
+
+        {% if session.loggedin %}
+        <div class="header-greeting">
+            ¡Hola, {{ session.nombre_persona }}!
+        </div>
+        {% else %}
+        <div class="header-greeting">
+            ¡Hola!
+        </div>
+        {% endif %}
+
+        <div class="header-icon notif-wrapper">
+            <i class='bx bx-bell' id="btnNotificaciones"></i>
+            <span class="badge-alertas" id="badgeAlertas" style="display:none;">0</span>
+            <div class="notif-panel" id="notifPanel" style="display:none;">
+                <div class="notif-header">Alertas</div>
+                <div class="notif-body" id="notifBody">
+                    <div class="notif-empty">Cargando alertas...</div>
+                </div>
+                <div class="notif-footer">
+                    <a href="{{ url_for('alerta_vencimiento_page') }}">Ver todas</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="dashboard-body">
+        <div class="table-ofertas">
+            <h2>Ofertas guardadas</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Nombre</th>
+                        <th>Precio combo</th>
+                        <th>Ganancia %</th>
+                        <th>Productos</th>
+                        <th>Unidades totales</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% if ofertas %}
+                    {% for o in ofertas %}
+                    <tr class="oferta-row"
+                        data-id-oferta="{{ o.id_oferta }}">
+                        <td>{{ loop.index }}</td>
+                        <td>{{ o.nombre }}</td>
+                        <td>${{ "%.2f"|format((o.precio_combo or 0)|float) }}</td>
+                        <td>{{ o.ganancia_porc or 0 }}%</td>
+                        <td>{{ o.cant_items or 0 }}</td>
+                        <td>{{ o.unidades_totales or 0 }}</td>
+                        <td>
+                            <button type="button"
+                                    class="btn-ver-detalle">
+                                Ver detalle
+                            </button>
+                        </td>
+                    </tr>
+
+                    <!-- fila expandible -->
+                    <tr class="oferta-detalle-row"
+                        data-parent-id="{{ o.id_oferta }}"
+                        style="display:none;">
+                        <td colspan="7">
+                            <div class="oferta-detalle-panel">
+                                Cargando detalle...
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="7" style="text-align:center;">
+                            No hay ofertas registradas todavía.
+                        </td>
+                    </tr>
+                {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <div class="navbar">
+        <div class="effect"></div>
+        <button data-url="{{ url_for('main_screen') }}">
+            <i class='bx bx-home'></i>
+            <span>Inicio</span>
+        </button>
+        <button data-url="{{ url_for('producto_page') }}">
+            <i class='bx bxs-box'></i>
+            <span>Productos</span>
+        </button>
+        <button class="plus scanner-btn" data-url="{{ url_for('scanner_page') }}">
+            <i class='bx bxs-scan-barcode'></i>
+            <span>Escáner</span>
+        </button>
+        <button data-url="{{ url_for('precios_page') }}">
+            <i class='bx bxs-dollar-circle'></i>
+            <span>Precios</span>
+        </button>
+        <button data-url="{{ url_for('ofertas_page') }}">
+            <i class='bx bxs-gift'></i>
+            <span>Ofertas</span>
+        </button>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    // navegación navbar
+    document.querySelectorAll('.navbar button[data-url]')
+      .forEach(btn => {
+        btn.addEventListener('click', function(){
+            const url = this.getAttribute('data-url');
+            if (url) window.location.href = url;
+        });
+    });
+
+    const rows = document.querySelectorAll('.oferta-row');
+    rows.forEach(row => {
+        const btn = row.querySelector('.btn-ver-detalle');
+        const id = row.dataset.idOferta;
+        const detalleRow = document.querySelector(
+            '.oferta-detalle-row[data-parent-id="'+id+'"]'
+        );
+        const panel = detalleRow
+            ? detalleRow.querySelector('.oferta-detalle-panel')
+            : null;
+
+        if (!btn || !detalleRow || !panel) return;
+
+        let loaded = false;
+        let visible = false;
+
+        btn.addEventListener('click', function(){
+            visible = !visible;
+            detalleRow.style.display = visible ? '' : 'none';
+
+            if (!visible) return;
+
+            if (!loaded){
+                panel.textContent = 'Cargando detalle...';
+                fetch('/api/ofertas/' + id + '/detalle')
+                  .then(r => r.json())
+                  .then(data => {
+                      if (data.status !== 'ok'){
+                          panel.textContent = 'Error al cargar detalle.';
+                          return;
+                      }
+                      loaded = true;
+                      renderDetalle(panel, data.items || []);
+                  })
+                  .catch(err => {
+                      console.error(err);
+                      panel.textContent = 'Error de red al cargar detalle.';
+                  });
+            }
+        });
+    });
+
+    function renderDetalle(panel, items){
+        if (!items.length){
+            panel.textContent = 'Esta oferta no tiene productos asociados.';
+            return;
+        }
+        let html = `
+            <strong>Productos en el combo:</strong>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Categoría</th>
+                        <th>Precio unit.</th>
+                        <th>Cant.</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+        items.forEach(it => {
+            const nombre   = it.nombre || 'N/A';
+            const cat      = it.categoria || 'N/A';
+            const precio   = (it.precioventa || 0).toFixed
+                ? it.precioventa.toFixed(2)
+                : parseFloat(it.precioventa || 0).toFixed(2);
+            const cant     = it.cantidad || 0;
+            html += `
+                <tr>
+                    <td>${nombre}</td>
+                    <td>${cat}</td>
+                    <td>$${precio}</td>
+                    <td>${cant}</td>
+                </tr>
+            `;
+        });
+        html += `</tbody></table>`;
+        panel.innerHTML = html;
+    }
+});
+</script>
+</body>
+</html>

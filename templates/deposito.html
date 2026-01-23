@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='styles/main.css') }}">
+    <link href="https://cdn.boxicons.com/fonts/basic/boxicons.min.css"
+          rel="stylesheet">
+    <title>Depósito | Gestión de Kioscos</title>
+
+    <style>
+    .table-deposito{
+        width: 90%;
+        margin: 20px auto;
+        font-family: Arial, sans-serif;
+        max-height: calc(100vh - 200px);
+        overflow: auto;
+        -webkit-overflow-scrolling: touch;
+        position: relative;
+    }
+    .table-deposito table{
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 600px;
+    }
+    .table-deposito th,
+    .table-deposito td{
+        padding: 10px 12px;
+        border: 1px solid #ddd;
+        text-align: left;
+        vertical-align: top;
+        font-size: 13px;
+    }
+    .table-deposito thead th{
+        background: #f4f4f4;
+        position: sticky;
+        top: 0;
+        z-index: 2;
+    }
+    .deposito-header{
+        display:flex;
+        justify-content: space-between;
+        align-items:center;
+        margin-bottom:8px;
+    }
+    .deposito-header h2{
+        margin:0;
+        font-size:18px;
+    }
+    .search-bar{
+        margin-bottom:8px;
+    }
+    .search-input{
+        width:100%;
+        padding:8px 10px;
+        border-radius:6px;
+        border:1px solid #ccc;
+        font-size:14px;
+    }
+    .estado-pill{
+        display:inline-block;
+        padding:2px 8px;
+        border-radius:999px;
+        font-size:11px;
+        font-weight:600;
+    }
+    .estado-ok{ background:#e7f5e7; color:#1e7b1e; }
+    .estado-proximo{ background:#fff3cd; color:#856404; }
+    .estado-vencido{ background:#f8d7da; color:#721c24; }
+    .ubicacion-tag{
+        display:inline-block;
+        padding:2px 8px;
+        border-radius:4px;
+        background:#eef2ff;
+        font-size:12px;
+    }
+    .subline{
+        font-size:11px;
+        color:#555;
+        margin-top:3px;
+    }
+    </style>
+</head>
+<body>
+<div id="pc-blocker">
+    <h1>Lo sentimos</h1>
+    <p>Esta aplicación está optimizada solo para dispositivos móviles.</p>
+    <p>Por favor, ingrese desde su celular.</p>
+</div>
+
+<div id="mobile-app">
+    <header class="app-header">
+        <div class="header-icon">
+            <i class='bx bx-user-circle'></i>
+        </div>
+
+        {% if session.loggedin %}
+        <div class="header-greeting">
+            ¡Hola, {{ session.nombre_persona }}!
+        </div>
+        {% else %}
+        <div class="header-greeting">
+            ¡Hola!
+        </div>
+        {% endif %}
+
+        <div class="header-icon notif-wrapper">
+            <i class='bx bx-bell' id="btnNotificaciones"></i>
+            <span class="badge-alertas" id="badgeAlertas" style="display:none;">0</span>
+            <div class="notif-panel" id="notifPanel" style="display:none;">
+                <div class="notif-header">Alertas</div>
+                <div class="notif-body" id="notifBody">
+                    <div class="notif-empty">Cargando alertas...</div>
+                </div>
+                <div class="notif-footer">
+                    <a href="{{ url_for('alerta_vencimiento_page') }}">Ver todas</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="dashboard-body">
+        <div class="table-deposito">
+            <div class="deposito-header">
+                <h2>Depósito (por lote)</h2>
+            </div>
+
+            <div class="search-bar">
+                <input type="text" id="depositoSearch" class="search-input"
+                       placeholder="Buscar por producto, categoría o ubicación...">
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Ubicación</th>
+                        <th>Producto</th>
+                        <th>Categoría</th>
+                        <th>Lote</th>
+                        <th>Stock</th>
+                        <th>Vence</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody id="depositoBody">
+                {% if lotes %}
+                    {% for l in lotes %}
+                    {% set dias = l.dias_restantes %}
+                    {% set fecha = l.fechavencimiento %}
+                    {% set estado = '' %}
+                    {% if fecha is none %}
+                        {% set estado = 'SIN_FECHA' %}
+                    {% elif dias is not none and dias < 0 %}
+                        {% set estado = 'VENCIDO' %}
+                    {% elif dias is not none and dias <= 15 %}
+                        {% set estado = 'PROXIMO' %}
+                    {% else %}
+                        {% set estado = 'OK' %}
+                    {% endif %}
+
+                    <tr class="deposito-row"
+                        data-text="
+                            {{ (l.ubicacion or '')|lower }}
+                            {{ (l.nombre or '')|lower }}
+                            {{ (l.categoria or '')|lower }}
+                            {{ (l.id_lote or '') }}
+                        ">
+                        <td>
+                            {% if l.ubicacion %}
+                                <span class="ubicacion-tag">{{ l.ubicacion }}</span>
+                            {% else %}
+                                <span class="ubicacion-tag">Sin ubicación</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <strong>{{ l.nombre or 'N/A' }}</strong>
+                            <div class="subline">
+                                Ingreso: {{ l.fechaingreso or 'N/A' }}
+                            </div>
+                        </td>
+                        <td>{{ l.categoria or 'N/A' }}</td>
+                        <td>#{{ l.id_lote }}</td>
+                        <td>{{ l.cantidad or 0 }}</td>
+                        <td>{{ l.fechavencimiento or 'Sin fecha' }}</td>
+                        <td>
+                            {% if estado == 'VENCIDO' %}
+                                <span class="estado-pill estado-vencido">Vencido</span>
+                            {% elif estado == 'PROXIMO' %}
+                                <span class="estado-pill estado-proximo">Próx. a vencer</span>
+                            {% elif estado == 'OK' %}
+                                <span class="estado-pill estado-ok">OK</span>
+                            {% else %}
+                                <span class="estado-pill">Sin fecha</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="7" style="text-align:center;">
+                            No hay lotes en el depósito.
+                        </td>
+                    </tr>
+                {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <div class="navbar">
+            <div class="effect"></div>
+
+            <button data-url="{{ url_for('main_screen') }}">
+                <i class='bx bx-home'></i>
+                <span>Inicio</span>
+            </button>
+
+            <button data-url="{{ url_for('producto_page') }}">
+                <i class='bx bxs-box'></i>
+                <span>Productos</span>
+            </button>
+
+            <button class="plus scanner-btn"
+                    data-url="{{ url_for('scanner_page') }}">
+                <i class='bx bxs-scan-barcode'></i>
+                <span>Escaner</span>
+            </button>
+
+            <button data-url="{{ url_for('precios_page') }}">
+                <i class='bx bxs-file-report'></i>
+                <span>Precios</span>
+            </button>
+
+            <button data-url="{{ url_for('ajustes_page') }}">
+                <i class='bx bxs-cog'></i>
+                <span>Ajustes</span>
+            </button>
+        </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    // navbar
+    document.querySelectorAll('.navbar button[data-url]')
+      .forEach(btn => {
+        btn.addEventListener('click', function(){
+            const url = this.getAttribute('data-url');
+            if (url) window.location.href = url;
+        });
+    });
+
+    navButtons.forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const url = btn.dataset.url;
+            if (url) {
+              window.location.href = url;
+            }
+          });
+        });
+
+    const searchInput = document.getElementById('depositoSearch');
+    const rows = document.querySelectorAll('.deposito-row');
+
+    if (searchInput && rows.length){
+        searchInput.addEventListener('input', function(){
+            const term = this.value.trim().toLowerCase();
+            rows.forEach(row => {
+                const txt = row.dataset.text || '';
+                if (!term || txt.indexOf(term) !== -1){
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    }
+});
+</script>
+
+<script src="{{ url_for('static', filename='javascript/main.js') }}"
+        type="text/javascript"></script>
+</body>
+</html>

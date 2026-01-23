@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro</title>
+    <link rel="stylesheet" href="./static/styles/styles.css">
+</head>
+<body>
+    <div class="wrapper">
+        <form action="/register" method="post">
+            <h1>Registrate</h1>
+            <div class="input-box">
+                <input type="text" id="nombre" name="nombre" placeholder="Nombre Completo" required 
+                pattern="[A-Za-zñÑáéíóúÁÉÍÓÚüÜ ]+" oninput="this.value = this.value.replace(/[^A-Za-zñÑáéíóúÁÉÍÓÚüÜ ]/g, '')" title="Solo se permiten letras, espacios y acentos.">
+                <i class='bx  bx-user'  ></i> 
+            </div>
+            <div class="input-box">
+                <input type="email" id="email" name="email" placeholder="Email" required>
+                <i class='bx bx-envelope'  ></i> </div>
+            <div class="input-box">
+                <input type="text" id="usuario" name="usuario" placeholder="Usuario" required>
+                <i class='bx  bx-user-circle'  ></i> </div>
+            <div class="input-box">
+                <input type="password" id="contrasena" name="contrasena" placeholder="Contraseña" required>
+                <i class='bxr  bx-lock'  style='color:#36c0ff'></i> 
+            </div>
+            <div class="input-box">
+                <input type="password" id="contrasena_confirm" name="contrasena_confirm" placeholder="Confirmar Contraseña" required>
+                <i class='bxr  bx-lock'  style='color:#36c0ff'></i> 
+            </div>
+            <div class="input-box">
+                <input type="password" id="secret_key" name="secret_key" placeholder="Código Secreto" required>
+                <i class='bx bx-key'  style='color:#36c0ff'></i> </div>
+            <br>
+            <button type="submit" class="btn">Registrarse</button>
+            <br><br>
+            <div class="register-link">
+                <h2>¿Ya tienes una cuenta? </h2>
+                <button type="button" class="btn-register" onclick="window.location.href='index.php'">Iniciar sesión</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

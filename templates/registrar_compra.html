@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registrar Compra | Gestión de Kioscos</title>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles/main.css') }}">
+  <link href="https://cdn.boxicons.com/fonts/basic/boxicons.min.css" rel="stylesheet">
+
+  <script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
+
+  <style>
+    .table-ofertas{ width: 90%; margin: 20px auto; font-family: Arial, sans-serif; max-height: calc(100vh - 200px); overflow: auto; -webkit-overflow-scrolling: touch; }
+    .table-ofertas table{ width:100%; border-collapse: collapse; min-width: 500px; }
+    .table-ofertas th, .table-ofertas td{ padding: 10px 12px; border:1px solid #ddd; text-align:left; vertical-align: top; font-size: 14px; }
+    .table-ofertas thead th{ background:#f4f4f4; position: sticky; top:0; z-index:2; }
+    .btn-ver-detalle{ background:#367cff; color:#fff; border:none; padding:6px 10px; border-radius:4px; font-size: 13px; cursor:pointer; }
+    .oferta-detalle-row{ background:#fafafa; }
+    .oferta-detalle-panel{ font-size:13px; }
+    .oferta-detalle-panel table{ width:100%; border-collapse: collapse; margin-top:6px; }
+    .oferta-detalle-panel th, .oferta-detalle-panel td{ padding:4px 6px; border:1px solid #ddd; font-size:12px; }
+
+    .form-container { width: 90%; margin: 20px auto; padding: 15px; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    .form-container h2 { text-align: center; margin-bottom: 20px; color: #333; }
+    .input-field-container { margin-bottom: 15px; }
+    .input-field-container label { display: block; margin-bottom: 5px; font-weight: 600; color: #555; font-size: 14px; }
+    .input-field-container input, .input-field-container select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 16px; box-sizing: border-box; }
+    .submit-button { width: 100%; padding: 12px; background-color: #367cff; color: white; border: none; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer; }
+    .scan-button { width: 100%; padding: 12px; background-color: #63B497; color: white; border: none; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
+    .manual-button { width: 100%; padding: 10px; background-color: #f39c12; color: white; border: none; border-radius: 5px; font-size: 14px; cursor: pointer; margin-bottom: 20px; }
+    .producto-card { padding: 15px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9; margin-bottom: 15px; }
+    .producto-card h3 { margin-top: 0; }
+    .producto-card .radio-group input { width: auto; margin-right: 5px; }
+
+    .modal-scanner { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); justify-content: center; align-items: center; }
+    .modal-content { background-color: white; padding: 20px; border-radius: 8px; width: 90%; max-width: 500px; text-align: center; }
+    #scanner-viewport { position: relative; width: 100%; height: 300px; border: 2px solid #ccc; }
+    #scanner-viewport > canvas, #scanner-viewport > video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+  </style>
+</head>
+
+<body>
+  <div id="pc-blocker">
+    <h1>Lo sentimos</h1>
+    <p>Esta aplicación está optimizada solo para dispositivos móviles.</p>
+    <p>Por favor, ingrese desde su celular.</p>
+  </div>
+
+  <div id="mobile-app">
+
+    <header class="app-header">
+      <div class="header-icon"><i class='bx bx-user-circle'></i></div>
+
+      {% if session.loggedin %}
+      <div class="header-greeting">¡Hola, {{ session.nombre_persona }}!</div>
+      {% else %}
+      <div class="header-greeting">¡Hola!</div>
+      {% endif %}
+
+      <div class="header-icon notif-wrapper">
+        <i class='bx bx-bell' id="btnNotificaciones"></i>
+        <span class="badge-alertas" id="badgeAlertas" style="display:none;">0</span>
+        <div class="notif-panel" id="notifPanel" style="display:none;">
+          <div class="notif-header">Alertas</div>
+          <div class="notif-body" id="notifBody"><div class="notif-empty">Cargando alertas...</div></div>
+          <div class="notif-footer"><a href="{{ url_for('alerta_vencimiento_page') }}">Ver todas</a></div>
+        </div>
+      </div>
+    </header>
+
+    <main class="dashboard-body">
+      <div class="form-container">
+        <h2>Registrar Compra (Lote)</h2>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="flash-message flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <form id="form-compra" action="{{ url_for('registrar_compra') }}" method="POST">
+          <div class="input-field-container">
+            <label for="id_proveedor">Proveedor:</label>
+            <select id="id_proveedor" name="id_proveedor" required>
+              <option value="">-- Seleccione un proveedor --</option>
+              {% for prov in proveedores %}
+                <option value="{{ prov.ID_PROVEEDOR }}">{{ prov.RAZON_SOCIAL }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <hr style="margin: 20px 0;">
+
+          <button type="button" id="open-scanner-btn" class="scan-button">
+            <i class='bx bxs-camera'></i> Abrir Escáner
+          </button>
+
+          <button type="button" id="open-manual-btn" class="manual-button">
+            <i class='bx bx-keyboard'></i> Ingreso Manual (si falla)
+          </button>
+
+          <div id="productos-cargados-container"></div>
+
+          <button type="submit" class="submit-button">Guardar Compra</button>
+        </form>
+      </div>
+    </main>
+
+    <div id="modal-scanner" class="modal-scanner">
+      <div class="modal-content">
+        <h3>Apunte al código de barras</h3>
+        <div id="scanner-viewport"></div>
+        <p id="scanner-status" style="color: red;"></p>
+        <button type="button" id="close-scanner-btn" style="margin-top: 15px;">Cancelar</button>
+      </div>
+    </div>
+
+    <div class="navbar">
+      <div class="effect"></div>
+      <button data-url="{{ url_for('main_screen') }}"><i class='bx bx-home'></i><span>Inicio</span></button>
+      <button data-url="{{ url_for('producto_page') }}"><i class='bx bxs-box'></i><span>Productos</span></button>
+      <button class="plus scanner-btn" data-url="{{ url_for('scanner_page') }}"><i class='bx bxs-scan-barcode'></i><span>Escaner</span></button>
+      <button data-url="{{ url_for('precios_page') }}"><i class='bx bxs-file-report'></i><span>Precios</span></button>
+      <button data-url="{{ url_for('ajustes_page') }}"><i class='bx bxs-cog'></i><span>Ajustes</span></button>
+    </div>
+  </div>
+
+  <script>
+document.addEventListener('DOMContentLoaded', () => {
+  const openScannerBtn  = document.getElementById('open-scanner-btn');
+  const closeScannerBtn = document.getElementById('close-scanner-btn');
+  const openManualBtn   = document.getElementById('open-manual-btn');
+  const modalScanner    = document.getElementById('modal-scanner');
+  const scannerStatus   = document.getElementById('scanner-status');
+  const cardsContainer  = document.getElementById('productos-cargados-container');
+
+  let contadorProductos = 0;
+  let scannerIsActive = false;
+  let detectAttached = false;
+  let lastScanTs = 0;
+
+  function stopScanner() {
+    try { Quagga.stop(); } catch (e) {}
+    scannerIsActive = false;
+    if (detectAttached) {
+      try { Quagga.offDetected(onBarcodeDetected); } catch (e) {}
+      detectAttached = false;
+    }
+  }
+
+  function attachDetectorOnce() {
+    if (detectAttached) return;
+    Quagga.onDetected(onBarcodeDetected);
+    detectAttached = true;
+  }
+
+  if (openScannerBtn) {
+    openScannerBtn.addEventListener('click', () => {
+      modalScanner.style.display = 'flex';
+      startScanner();
+    });
+  }
+
+  if (closeScannerBtn) {
+    closeScannerBtn.addEventListener('click', () => {
+      stopScanner();
+      modalScanner.style.display = 'none';
+    });
+  }
+
+  if (openManualBtn) {
+    openManualBtn.addEventListener('click', () => {
+      const barcode = prompt("INGRESO MANUAL:\nEscriba el código de barras:");
+      if (barcode && barcode.trim()) buscarYCrearTarjeta(barcode.trim());
+    });
+  }
+
+  function startScanner() {
+    scannerStatus.textContent = "Iniciando cámara...";
+    stopScanner();
+    attachDetectorOnce();
+
+    Quagga.init({
+      inputStream: {
+        name: "Live",
+        type: "LiveStream",
+        target: document.querySelector('#scanner-viewport'),
+        constraints: { facingMode: "environment" }
+      },
+      decoder: { readers: ["ean_reader", "ean_8_reader", "code_128_reader", "upc_reader"] },
+      locate: true
+    }, (err) => {
+      if (err) {
+        console.error(err);
+        scannerStatus.textContent = "Error al iniciar la cámara.";
+        return;
+      }
+      Quagga.start();
+      scannerIsActive = true;
+      scannerStatus.textContent = "Cámara iniciada. Escaneando...";
+    });
+  }
+
+  function onBarcodeDetected(result) {
+    const now = Date.now();
+    if (now - lastScanTs < 900) return;
+    lastScanTs = now;
+
+    const codigo = result && result.codeResult && result.codeResult.code;
+    if (!codigo) return;
+
+    scannerStatus.textContent = "¡Código detectado!";
+    stopScanner();
+    modalScanner.style.display = 'none';
+    buscarYCrearTarjeta(codigo);
+  }
+
+  const LOOKUP_URL = (window.SCANNER_CFG && window.SCANNER_CFG.lookupUrl)
+    ? window.SCANNER_CFG.lookupUrl
+    : '/scanner/lookup';
+
+  function buscarYCrearTarjeta(barcode) {
+    const b = String(barcode || '').trim();
+    if (!b) return;
+
+    const loadingCard = document.createElement('div');
+    loadingCard.className = 'producto-card';
+    loadingCard.innerHTML = `<h3>Buscando ${b}...</h3>`;
+    cardsContainer.appendChild(loadingCard);
+
+    fetch(LOOKUP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ codigo: b })
+    })
+    .then(async (response) => {
+      if (response.status === 401) {
+        window.location.href = "{{ url_for('show_login_form') }}";
+        return null;
+      }
+
+      if (response.status === 404) {
+        return {
+          status: 'found',
+          id_producto: null,
+          nombre: '',
+          categoria: '',
+          incompleto: true,
+          codigo: b
+        };
+      }
+
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return await response.json();
+    })
+    .then((data) => {
+      if (!data) return;
+      loadingCard.remove();
+      crearTarjetaProducto(data, b);
+    })
+    .catch((err) => {
+      loadingCard.remove();
+      console.error(err);
+      alert(`Error al buscar ${b}. Detalles: ${err.message}`);
+    });
+  }
+
+  // ✅ EXPORT: para que también se pueda disparar desde fuera (scanner u otros)
+  window.buscarYCrearTarjeta = buscarYCrearTarjeta;
+  window.addEventListener('AUTO_BARCODE', (ev) => {
+    const code = ev && ev.detail && ev.detail.barcode ? String(ev.detail.barcode).trim() : '';
+    if (code) buscarYCrearTarjeta(code);
+  });
+
+  function crearTarjetaProducto(data, barcode) {
+    contadorProductos++;
+
+    const card = document.createElement('div');
+    card.className = 'producto-card';
+
+    let nombreInput = '';
+    let categoriaInput = '';
+    let idProducto = (data && data.id_producto !== undefined) ? data.id_producto : null;
+
+    const nombreDB = String((data && data.nombre) || '').trim();
+    const catDB    = String((data && data.categoria) || '').trim();
+
+    const esPlaceholder =
+      data.incompleto === true ||
+      !nombreDB ||
+      nombreDB.toUpperCase().startsWith('NUEVO_') ||
+      !catDB ||
+      catDB.toUpperCase() === 'SIN CATEGORIA';
+
+    const titulo = (!esPlaceholder && nombreDB)
+      ? nombreDB
+      : `Producto escaneado: ${barcode}`;
+
+    if (data.status && !['found', 'new_registered'].includes(data.status)) {
+      card.innerHTML = `<h3>Error: ${(data.mensaje || 'respuesta inválida')} (Código: ${barcode})</h3>`;
+      cardsContainer.appendChild(card);
+      return;
+    }
+
+    card.innerHTML = `<h3>${titulo}${idProducto ? ` (ID: ${idProducto})` : ''}</h3>`;
+
+    if (esPlaceholder || data.status === 'new_registered') {
+      nombreInput = `
+        <div class="input-field-container">
+          <label>Nombre del Producto:</label>
+          <input type="text"
+                 name="producto_${contadorProductos}_nombre"
+                 value="${(!nombreDB || nombreDB.toUpperCase().startsWith('NUEVO_')) ? '' : nombreDB}"
+                 placeholder="Ej: Alfajor de Maicena"
+                 required>
+        </div>
+      `;
+
+      categoriaInput = `
+        <div class="input-field-container">
+          <label>Categoría:</label>
+          <select name="producto_${contadorProductos}_categoria" required>
+            <option value="">-- Seleccione una categoría --</option>
+            <option value="BEBIDAS_SIN_ALCOHOL">Bebidas sin alcohol</option>
+            <option value="BEBIDAS_CON_ALCOHOL">Bebidas con alcohol</option>
+            <option value="SNACKS_SALADOS">Snacks salados</option>
+            <option value="GOLOSINAS">Golosinas</option>
+            <option value="PANADERIA_FACTURAS">Panadería y facturas</option>
+            <option value="LACTEOS_Y_FRIO">Lácteos y frío</option>
+            <option value="CONGELADOS">Congelados</option>
+            <option value="ALMACEN_SECO">Almacén seco</option>
+            <option value="DESAYUNO_MERIENDA">Desayuno y merienda</option>
+            <option value="LIMPIEZA">Productos de limpieza</option>
+            <option value="HIGIENE_PERSONAL">Higiene personal</option>
+            <option value="MASCOTAS">Mascotas</option>
+            <option value="PAPELERIA_LIBRERIA">Papelería y librería</option>
+            <option value="CIGARRILLOS_AF">Cigarrillos y afines</option>
+            <option value="VARIOS">Varios / Otros</option>
+          </select>
+        </div>
+      `;
+    }
+
+    card.innerHTML += `
+      <input type="hidden" name="producto_${contadorProductos}_id" value="${idProducto ?? ''}">
+
+      ${nombreInput}
+      ${categoriaInput}
+
+      <div class="input-field-container">
+        <label>Tipo de Ingreso:</label>
+        <select class="tipo-venta-select" name="producto_${contadorProductos}_tipo_venta">
+          <option value="unidad" selected>Unidad</option>
+          <option value="pack">Pack / Caja</option>
+        </select>
+      </div>
+
+      <div class="unidad-box input-field-container">
+        <label>Cantidad (unidades):</label>
+        <input type="number" name="producto_${contadorProductos}_cantidad_unidad" min="1" value="1">
+      </div>
+
+      <div class="pack-box input-field-container" style="display:none;">
+        <label>Unidades por Pack:</label>
+        <input type="number" name="producto_${contadorProductos}_unidades_pack" min="1" value="6">
+        <label>Cantidad de Packs:</label>
+        <input type="number" name="producto_${contadorProductos}_cantidad_pack" min="1" value="1">
+      </div>
+
+      <div class="input-field-container">
+        <label>Precio Costo (por unidad):</label>
+        <input type="number" name="producto_${contadorProductos}_preciocosto" step="0.01" min="0" required>
+      </div>
+
+      <div class="input-field-container">
+        <label>Precio Venta (por unidad):</label>
+        <input type="number" name="producto_${contadorProductos}_precioventa" step="0.01" min="0" required>
+      </div>
+
+      <div class="input-field-container">
+        <label>Porcentaje de ganancia (%):</label>
+        <input type="number" name="producto_${contadorProductos}_porcganancia" step="0.01" min="0" value="30">
+      </div>
+
+      <div class="input-field-container">
+        <label>Ubicación del lote:</label>
+        <div style="display:flex; gap:8px;">
+          <select name="producto_${contadorProductos}_ubicacion_zona">
+            <option value="">Zona</option>
+            <option value="DEPOSITO">Depósito</option>
+            <option value="SALON">Salón / Góndola</option>
+            <option value="HELADERA">Heladera</option>
+            <option value="FREEZER">Freezer</option>
+            <option value="MOSTRADOR">Mostrador</option>
+          </select>
+        </div>
+        <input type="text" name="producto_${contadorProductos}_ubicacion_codigo" placeholder="A1, B3, G2..." style="flex:1; margin-top:5px;">
+        <small style="font-size:12px;color:#777;">Ejemplos: DEPOSITO + A1, SALON + G2, HELADERA + H1.</small>
+      </div>
+
+      <div class="input-field-container">
+        <label>¿Tiene Vencimiento?</label>
+        <select class="vencimiento-select" name="producto_${contadorProductos}_tiene_vencimiento">
+          <option value="no" selected>No</option>
+          <option value="si">Sí</option>
+        </select>
+      </div>
+
+      <div class="fecha-vencimiento-box input-field-container" style="display:none;">
+        <label>Fecha de Vencimiento:</label>
+        <input type="date" name="producto_${contadorProductos}_fecha_vencimiento">
+      </div>
+
+      <button type="button" class="quitar-btn" style="background:red; color:white;">Quitar</button>
+    `;
+
+    cardsContainer.appendChild(card);
+
+    if ((esPlaceholder || data.status === 'new_registered') && catDB) {
+      const sel = card.querySelector(`select[name="producto_${contadorProductos}_categoria"]`);
+      if (sel) sel.value = catDB;
+    }
+
+    const btnQuitar = card.querySelector('.quitar-btn');
+    if (btnQuitar) btnQuitar.addEventListener('click', () => card.remove());
+
+    const tipoSel = card.querySelector('.tipo-venta-select');
+    if (tipoSel) tipoSel.addEventListener('change', (e) => {
+      const isPack = e.target.value === 'pack';
+      card.querySelector('.pack-box').style.display = isPack ? 'block' : 'none';
+      card.querySelector('.unidad-box').style.display = isPack ? 'none' : 'block';
+    });
+
+    const vencSel = card.querySelector('.vencimiento-select');
+    if (vencSel) vencSel.addEventListener('change', (e) => {
+      card.querySelector('.fecha-vencimiento-box').style.display = (e.target.value === 'si') ? 'block' : 'none';
+    });
+
+    const inputCosto = card.querySelector(`input[name="producto_${contadorProductos}_preciocosto"]`);
+    const inputVenta = card.querySelector(`input[name="producto_${contadorProductos}_precioventa"]`);
+    const inputPorc  = card.querySelector(`input[name="producto_${contadorProductos}_porcganancia"]`);
+
+    function parseNum(v){
+      if (!v) return 0;
+      const n = parseFloat(String(v).replace(',', '.'));
+      return isNaN(n) ? 0 : n;
+    }
+
+    function recalcularDesdePorcentaje(){
+      const costo = parseNum(inputCosto.value);
+      const porc  = parseNum(inputPorc.value);
+      if (costo > 0 && porc >= 0){
+        inputVenta.value = (costo * (1 + porc/100)).toFixed(2);
+      }
+    }
+
+    function recalcularDesdeVenta(){
+      const costo = parseNum(inputCosto.value);
+      const venta = parseNum(inputVenta.value);
+      if (costo > 0 && venta >= 0){
+        inputPorc.value = (((venta - costo) / costo) * 100).toFixed(2);
+      } else {
+        inputPorc.value = '';
+      }
+    }
+
+    if (inputPorc) inputPorc.addEventListener('input', recalcularDesdePorcentaje);
+
+    if (inputCosto) inputCosto.addEventListener('input', () => {
+      const porcVal  = parseNum(inputPorc.value);
+      const ventaVal = parseNum(inputVenta.value);
+      if (porcVal > 0) recalcularDesdePorcentaje();
+      else if (ventaVal > 0) recalcularDesdeVenta();
+    });
+
+    if (inputVenta) inputVenta.addEventListener('input', recalcularDesdeVenta);
+
+    setTimeout(() => {
+      try { card.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {}
+    }, 50);
+  }
+
+  // ✅ AUTOLOAD: querystring + sessionStorage.pending_barcode
+  function getIncomingBarcode(){
+    const qs = new URLSearchParams(window.location.search);
+    const fromQS = String(qs.get('barcode') || qs.get('ean13') || qs.get('code') || '').trim();
+    if (fromQS) return fromQS;
+
+    try {
+      const fromSS = String(sessionStorage.getItem('pending_barcode') || '').trim();
+      if (fromSS) return fromSS;
+    } catch (e) {}
+
+    return '';
+  }
+
+  function clearIncomingBarcode(){
+    try { sessionStorage.removeItem('pending_barcode'); } catch (e) {}
+    try { window.history.replaceState({}, document.title, window.location.pathname); } catch (e) {}
+  }
+
+  const incoming = getIncomingBarcode();
+  if (incoming) {
+    buscarYCrearTarjeta(incoming);
+    clearIncomingBarcode();
+  }
+});
+</script>
+
+
+  <script src="{{ url_for('static', filename='javascript/main.js') }}" type="text/javascript"></script>
+</body>
+</html>

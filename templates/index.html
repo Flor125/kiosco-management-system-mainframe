@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ingreso</title>
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/styles.css') }}">
+    
+    <link href='https://cdn.boxicons.com/fonts/basic/boxicons.min.css' rel='stylesheet'>
+</head>
+<body>
+    <div class="wrapper">
+        
+        <form action="{{ url_for('login_user') }}" method="post">
+    <h1>¡Bienvenido!</h1>
+    <h2>Logueate para ingresar</h2>
+    <div class="input-box">
+        <input type="text" id="usuario" name="usuario" placeholder="Ingrese su usuario" required>
+        <i class='bx  bx-user'  ></i> 
+    </div>
+    <div class="input-box">
+    <input type="password" id="contrasena" name="contrasena" placeholder="Ingrese su contraseña" required>
+    <i class='bxr  bx-lock'  style='color:#36c0ff'></i> 
+    </div>
+
+    <div class="remember-forgot">
+        <label><input type="checkbox" name="remember"> Recuérdame</label>
+        <a href="#">Olvidé mi contraseña</a>
+    </div>
+    <br>
+    <button type="submit" class="btn" >Ingresar</button>
+    <br><br>
+   <div class="register-link">
+        <h2 class="register-heading">¿No tienes una cuenta?</h2>
+        
+        <button type="button" class="btn-register js-nav-btn" data-url="{{ url_for('show_register_form') }}">Regístrate
+        </button>
+    </div>
+    </form>
+</body>
+<script src="{{ url_for('static', filename='javascript/main.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+    // 1. Busca todos los botones que tengan la clase 'js-nav-btn'
+    const navButtons = document.querySelectorAll('.js-nav-btn');
+
+    // 2. Recorre cada botón que encontró
+    navButtons.forEach(button => {
+        
+        // 3. A cada botón le agrega un "escuchador de clics"
+        button.addEventListener('click', () => {
+            
+            // 4. Cuando se hace clic, obtiene la URL del atributo 'data-url'
+            const url = button.dataset.url;
+
+            // 5. Si la URL existe, redirige la página a esa URL
+            if (url) {
+                window.location.href = url;
+            } else {
+                console.error('Este botón no tiene un data-url definido.');
+            }
+        });
+    });
+});
+</script>
+</html>

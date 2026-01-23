@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Kioscos</title>
+    <style>
+        :root{
+            --bg: #0f172a;
+            --card-bg: #0b1120;
+            --accent: #38bdf8;
+            --accent-soft: rgba(56, 189, 248, 0.12);
+            --text-main: #e5e7eb;
+            --text-muted: #9ca3af;
+            --danger: #f97373;
+            --success: #4ade80;
+        }
+
+        *{
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Karla", sans-serif;
+        }
+
+        body{
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at top, #1f2937 0, #020617 55%);
+            color: var(--text-main);
+            padding: 16px;
+        }
+
+        .status-wrapper{
+            max-width: 420px;
+            width: 100%;
+        }
+
+        .status-card{
+            background: linear-gradient(135deg, #020617, #020617) padding-box,
+                        linear-gradient(135deg, #4b5563, #0ea5e9) border-box;
+            border-radius: 24px;
+            border: 1px solid transparent;
+            padding: 24px 22px 20px;
+            box-shadow: 0 22px 40px rgba(0,0,0,0.45);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .status-card::before{
+            content:"";
+            position:absolute;
+            width:180px;
+            height:180px;
+            background: radial-gradient(circle, rgba(56,189,248,0.18), transparent 65%);
+            top:-60px;
+            right:-40px;
+            pointer-events:none;
+        }
+
+        .status-icon{
+            width: 46px;
+            height: 46px;
+            border-radius: 999px;
+            background: rgba(15,23,42,0.9);
+            border: 1px solid rgba(148,163,184,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 14px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .status-icon span{
+            font-size: 24px;
+        }
+
+        .status-role{
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: rgba(15,23,42,0.85);
+            border: 1px solid rgba(148,163,184,0.5);
+            color: var(--text-muted);
+            font-size: 11px;
+            margin-bottom: 8px;
+        }
+
+        .status-role strong{
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .status-title{
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            line-height: 1.25;
+            position: relative;
+            z-index: 1;
+        }
+
+        .status-message{
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 18px;
+            line-height: 1.5;
+            position: relative;
+            z-index: 1;
+        }
+
+        .status-redirect{
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--text-muted);
+            position: relative;
+            z-index: 1;
+        }
+
+        .status-pill{
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: var(--accent-soft);
+            color: var(--accent);
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .spinner{
+            width: 14px;
+            height: 14px;
+            border-radius: 999px;
+            border: 2px solid rgba(148,163,184,0.4);
+            border-top-color: var(--accent);
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin{
+            to{ transform: rotate(360deg); }
+        }
+
+        /* Modo “éxito” / “error” opcional por mensaje */
+        .status-card--ok .status-icon{
+            border-color: rgba(74, 222, 128, 0.7);
+        }
+        .status-card--ok .status-pill{
+            background: rgba(74, 222, 128, 0.16);
+            color: var(--success);
+        }
+
+        .status-card--error .status-icon{
+            border-color: rgba(248, 113, 113, 0.8);
+        }
+        .status-card--error .status-pill{
+            background: rgba(248, 113, 113, 0.16);
+            color: var(--danger);
+        }
+    </style>
+</head>
+<body>
+    <div class="status-wrapper">
+        {# 
+           Podés, si querés, setear una clase extra desde Flask:
+           return render_template(..., status_class="status-card--ok")
+           o "status-card--error"
+        #}
+        <div class="status-card {{ status_class or '' }}">
+            <div class="status-icon">
+                <span>✨</span>
+            </div>
+
+            {# Rol del usuario, ligado a la sesión #}
+            {% if session.rol %}
+            <div class="status-role">
+                Rol actual:
+                <strong>
+                    {% if session.rol == 'JEFE' %}
+                        JEFE
+                    {% elif session.rol == 'EMPLEADO' %}
+                        EMPLEADO
+                    {% else %}
+                        {{ session.rol }}
+                    {% endif %}
+                </strong>
+            </div>
+            {% endif %}
+
+            <!-- Mensaje principal que vos le mandás desde el backend -->
+            <h1 class="status-title">
+                {{ mensaje|safe }}
+            </h1>
+
+            <!-- Mensaje secundario (puede quedar fijo) -->
+            <p class="status-message">
+                Esta pantalla se cerrará automáticamente y te llevaré a la próxima sección del sistema.
+            </p>
+
+            <div class="status-redirect">
+                <div class="status-pill">
+                    Redirigiendo en 3 segundos...
+                </div>
+                <div class="spinner" aria-hidden="true"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Redirección después de 3 segundos (sin cambios)
+        setTimeout(function() {
+            window.location.href = "{{ destino }}";
+        }, 3000);
+    </script>
+</body>
+</html>

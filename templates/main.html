@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/main.css') }}">
+    <link href='https://cdn.boxicons.com/fonts/basic/boxicons.min.css' rel='stylesheet'>
+    <title>Menu Principal | Gestion de Kioscos</title>
+</head>
+<body>
+    <div id="pc-blocker">
+        <h1>Lo sentimos</h1>
+        <p>Esta aplicación está optimizada solo para dispositivos móviles.</p>
+        <p>Por favor, ingrese desde su celular.</p>
+    </div>
+    <div id="mobile-app"> 
+<header class="app-header">
+    
+    <div class="header-icon">
+        <i class='bx bx-user-circle'></i>
+    </div>
+    
+    {% if session.loggedin %}
+    <div class="header-greeting">
+        ¡Hola, {{ session.nombre_persona }}!
+    </div>
+    {% else %}
+    <div class="header-greeting">
+        ¡Hola!
+    </div>
+    {% endif %}
+    
+    <div class="header-icon">
+        <i class='bx  bx-bell'  ></i> 
+    </div>
+</header>
+<main class="dashboard-body">
+
+        <div class="swiper carousel">
+            <div class="swiper-wrapper">
+                <div class="swiper-slide">
+                    <img src="#" alt="Oferta 1" >
+                </div>
+                <div class="swiper-slide">
+                    <img src="#" alt="Oferta 2" >
+                </div>
+                <div class="swiper-slide">
+                    <img src="#" alt="Oferta 3" >
+                </div>
+                <div class="swiper-slide">
+                    <img src="#" alt="Oferta 4" >
+                </div>
+            </div>
+            <button type="button" class="swiper-button-next"></button>
+            <button type="button" class="swiper-button-prev"></button>
+            <div class="swiper-pagination"></div>
+        </div>
+
+        
+        <section class="icon-grid">
+    
+    <a href="#" class="grid-item">
+       <i class='bx  bxs-checklist'    ></i> 
+        <span>Registrar producto</span>
+    </a>
+    <a href="#" class="grid-item">
+        <i class='bx  bxs-price-tag' ></i> 
+        <span>Ofertas</span>
+    </a>
+    
+    <a href="#" class="grid-item">
+        <i class='bx  bxs-package'></i> 
+        <span>Depósito</span>
+    </a>
+
+</section>
+
+        <section class="block-favorite-card">
+        <div class="favorite-card-content">
+            <div class="favorite-card-text">
+                <h2>Alerta de vencimientos</h2>
+                <p>Productos próximos a vencer</p>
+            </div>
+        </section>
+
+
+        <section class="block-savings-card">
+        <div class="savings-card-content">
+            <div class="savings-card-text">
+                <h2>Carta - Empleados</h2>
+                <p>Sólo visible para jefe</p>
+            </div>
+        </section>
+
+        <section class="block-title"></section>
+
+        <section class="block-coupons"></section>
+
+    </main>
+
+    <div class="navbar">
+        <div class="effect"></div>
+        <button data-url="{{ url_for('main_screen') }}">
+           <i class='bx bx-home'></i> 
+           <span>Inicio</span>
+        </button>
+        <button onclick="window.location.href='#'">
+            <i class='bx  bxs-box'></i> 
+            <span>Productos</span>
+        </button>
+           <button class="plus scanner-btn" data-url="{{ url_for('scanner_page') }}">
+            <i class='bx  bxs-scan-barcode'></i> 
+            <span>Escaner</span>
+        </button>
+        <button onclick="window.location.href='#'">
+            <i class='bx  bxs-file-report'    ></i> 
+            <span>Precios</span>
+        </button>
+        <button onclick="window.location.href='#'">
+            <i class='bx  bxs-cog'></i> 
+            <span>Ajustes</span>
+        </button>
+    </div>
+    </div>
+</body>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Seleccionamos el botón por su clase scanner-btn
+        const scannerBtn = document.querySelector('.scanner-btn'); 
+        
+        scannerBtn.addEventListener('click', function() {
+            // Obtenemos la URL de forma limpia del atributo data-url
+            const url = this.getAttribute('data-url'); 
+            window.location.href = url;
+        });
+    });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js">
+</script>
+<script src="{{ url_for('static', filename='javascript/main.js') }}" type="text/javascript"></script></html>

@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/main.css') }}">
+    <link href='https://cdn.boxicons.com/fonts/basic/boxicons.min.css' rel='stylesheet'>
+    <title>Scanner | Gestion de Kioscos</title>
+
+    <style>
+      /* Estilos necesarios para el visor de la cámara */
+        #interactive.viewport {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3/4;   /* cuadrado lleno */
+  background: #000;
+  overflow: hidden;
+  border: 2px solid #ccc;
+  margin: 10px 0;
+  height: 300px;          /* IMPORTANTE: no fijo 350px */
+}
+
+/* Quagga inserta video y canvas acá adentro */
+#interactive.viewport video,
+#interactive.viewport canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;     /* CLAVE: llena el cuadro */
+}
+
+        /* Panel flotante de resultados del scanner */
+.results-overlay {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 72px;              /* deja espacio para la navbar */
+  margin: 0 auto;
+  max-width: 600px;
+  width: 100%;
+  padding: 16px 20px;
+  background: #ffffff;
+  border-radius: 16px 16px 0 0;
+  box-shadow: 0 -4px 16px rgba(0,0,0,0.25);
+  border: 1px solid #ddd;
+  max-height: 45vh;
+  overflow-y: auto;
+  z-index: 1200;
+}
+
+/* Centrar en pantallas grandes y que no moleste tanto en escritorio */
+@media (min-width: 768px) {
+  .results-overlay {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    bottom: 96px;            /* un poquito más arriba en desktop */
+    max-width: 480px;
+  }
+}
+
+
+        .btn-add-product{
+            background-color: #367cff;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .btn-add-product:active{
+            background-color: #2a9bd9;
+        }
+
+        .list-header{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="pc-blocker">
+        <h1>Lo sentimos</h1>
+        <p>Esta aplicación está optimizada solo para dispositivos móviles.</p>
+        <p>Por favor, ingrese desde su celular.</p>
+    </div>
+
+    <div id="mobile-app"> 
+        <header class="app-header">
+            <div class="header-icon">
+                <i class='bx bx-user-circle'></i>
+            </div>
+            
+            {% if session.loggedin %}
+            <div class="header-greeting">
+                ¡Hola, {{ session.nombre_persona }}!
+            </div>
+            {% else %}
+            <div class="header-greeting">
+                ¡Hola!
+            </div>
+            {% endif %}
+            
+            <div class="header-icon">
+                <i class='bx bx-bell'></i> 
+            </div>
+        </header>
+
+        <main class="dashboard-body">
+            <!-- Banner contextual de vencimiento -->
+            <div id="alertaVencimientoBanner" class="scan-alert-banner" style="display:none;">
+                <div class="scan-alert-text">
+                    ⚠ Este producto tiene alertas de vencimiento activas.
+                </div>
+                <div class="scan-alert-actions">
+                    <button type="button" id="btnVerAlertas" class="scan-alert-btn">
+                        Ver alertas
+                    </button>
+                    <button type="button" id="btnIgnorarAlertas" class="scan-alert-btn secundario">
+                        Ignorar
+                    </button>
+                </div>
+            </div>
+
+            <section id="scanner-controls">
+                <div class="list-header">
+                    <h2>Cámara de Escaneo</h2>
+                    <button class="btn-add-product" onclick="window.location.href='/registrar_compra'">
+                        Agregar Producto
+                    </button>
+                </div>
+
+                <div id="interactive" class="viewport"></div>
+                
+                <button onclick="startScanner()" class="btn success">Iniciar Escaneo</button>
+                <button onclick="Quagga.stop()" class="btn">Detener Cámara</button>
+
+                <div id="message-area"
+                     style="margin-top: 10px; color: green; font-weight: bold;">
+                     Esperando...
+                </div>
+            </section>
+            
+            <hr>
+            
+            <section id="manual-lookup">
+                <h2>Ingresa Código Manualmente</h2>
+                <input type="text"
+                       id="codigo_barras"
+                       placeholder="Código de Barras"
+                       required
+                       style="width: 100%; padding: 10px; margin-bottom: 10px;">
+                <button onclick="buscarProductoManual()" class="btn">
+                    Buscar Producto
+                </button>
+            </section>
+            
+            <section id="results-area" class="results-overlay" style="display: none;">
+    <p><strong>Producto:</strong> <span id="nombre_producto"></span> (<span id="id_producto_display"></span>)</p>
+    <p><strong>Precio Venta:</strong> $<span id="precio_venta"></span></p>
+    <p><strong>Stock Total:</strong> <span id="stock_total"></span> unidades</p>
+    <p><strong>Ubicación:</strong> <span id="ubicacion"></span></p>
+
+    <hr>
+
+    <div id="transaction-actions">
+        <button class="btn success" onclick="confirmarVenta()">Compró - Registrar Venta</button>
+        <button class="btn" onclick="soloConsulta()">Solo Consulta</button>
+    </div>
+</section>
+
+        </main>
+
+        <div class="navbar">
+            <div class="effect"></div>
+
+            <button data-url="{{ url_for('main_screen') }}">
+                <i class='bx bx-home'></i>
+                <span>Inicio</span>
+            </button>
+
+            <button data-url="{{ url_for('producto_page') }}">
+                <i class='bx bxs-box'></i>
+                <span>Productos</span>
+            </button>
+
+            <button class="plus scanner-btn"
+                    data-url="{{ url_for('scanner_page') }}">
+                <i class='bx bxs-scan-barcode'></i>
+                <span>Escaner</span>
+            </button>
+
+            <button data-url="{{ url_for('precios_page') }}">
+                <i class='bx bxs-file-report'></i>
+                <span>Precios</span>
+            </button>
+
+            <button data-url="{{ url_for('ajustes_page') }}">
+                <i class='bx bxs-cog'></i>
+                <span>Ajustes</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Librerías externas -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+
+    <!-- Config para el scanner (Jinja vive acá) -->
+     <script>
+    window.SCANNER_CFG = {
+      lookupUrl: "{{ url_for('scanner_lookup') }}",
+      confirmarUrl: "{{ url_for('venta_confirmar') }}",
+      loginUrl: "{{ url_for('show_login_form') }}",
+      alertasUrl: "{{ url_for('alerta_vencimiento_page') }}",
+      preciosUrl: "{{ url_for('registrar_compra') }}"
+    };
+
+    // --- PARCHE CLAVE ---
+    // Si por cualquier motivo el scanner NO pasa ?barcode=..., guardamos el último barcode en sessionStorage.
+    // registrar_compra.html lo va a levantar y abrir la tarjeta automáticamente.
+    window.ScannerNav = {
+      setPendingBarcode(code){
+        try{ sessionStorage.setItem('pending_barcode', String(code || '')); }catch(e){}
+      },
+      clearPendingBarcode(){
+        try{ sessionStorage.removeItem('pending_barcode'); }catch(e){}
+      },
+      goRegistrarCompra(code){
+        const base = (window.SCANNER_CFG && window.SCANNER_CFG.preciosUrl) ? window.SCANNER_CFG.preciosUrl : '/registrar_compra';
+        const clean = String(code || '').trim();
+        if (clean) {
+          this.setPendingBarcode(clean);
+          // Intento 1: querystring (ideal)
+          window.location.href = `${base}?barcode=${encodeURIComponent(clean)}`;
+        } else {
+          window.location.href = base;
+        }
+      }
+    };
+
+    // Botón manual “Agregar Producto”: si hay barcode pendiente o último detectado, lo pasa
+    document.addEventListener('DOMContentLoaded', () => {
+      const btn = document.getElementById('btnAgregarProducto');
+      if (!btn) return;
+      btn.addEventListener('click', () => {
+        let last = '';
+        try{ last = sessionStorage.getItem('pending_barcode') || ''; }catch(e){}
+        window.ScannerNav.goRegistrarCompra(last);
+      });
+    });
+
+    // Stop seguro (para evitar errores si Quagga no existe)
+    function stopScannerSafe(){
+      try{ if (window.Quagga) Quagga.stop(); }catch(e){}
+    }
+  </script>
+
+
+    <!-- Quagga -->
+    <script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
+
+    <!-- JS de tu app -->
+    <script src="{{ url_for('static', filename='javascript/main.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='javascript/scanner.js') }}" type="text/javascript"></script>
+</body>
+</html>

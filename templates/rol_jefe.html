@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Swiper CSS -->
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
+    <!-- Estilos propios -->
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='styles/main.css') }}">
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='styles/rol_jefe.css') }}">
+
+    <!-- Iconos Boxicons -->
+    <link href="https://cdn.boxicons.com/fonts/basic/boxicons.min.css"
+          rel="stylesheet">
+
+    <title>Menu Principal | Gestion de Kioscos</title>
+</head>
+<body>
+    <div id="pc-blocker">
+        <h1>Lo sentimos</h1>
+        <p>Esta aplicación está optimizada solo para dispositivos móviles.</p>
+        <p>Por favor, ingrese desde su celular.</p>
+    </div>
+
+    <div id="mobile-app">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-icon">
+                <i class='bx bx-user-circle'></i>
+            </div>
+
+            {% if session.loggedin %}
+            <div class="header-greeting">
+                ¡Hola, {{ session.nombre_persona }}!
+            </div>
+            {% else %}
+            <div class="header-greeting">
+                ¡Hola!
+            </div>
+            {% endif %}
+
+            <div class="header-icon notif-wrapper">
+            <i class='bx bx-bell' id="btnNotificaciones"></i>
+            <span class="badge-alertas" id="badgeAlertas" style="display:none;">0</span>
+            <div class="notif-panel" id="notifPanel" style="display:none;">
+                <div class="notif-header">Alertas</div>
+                <div class="notif-body" id="notifBody">
+                    <div class="notif-empty">Cargando alertas...</div>
+                </div>
+                <div class="notif-footer">
+                    <a href="{{ url_for('alerta_vencimiento_page') }}">Ver todas</a>
+                </div>
+            </div>
+        </div>
+        </header>
+
+        <!-- Main -->
+        <main class="dashboard-body">
+
+            <!-- Carrusel -->
+            <div class="swiper carousel">
+                <div class="swiper-wrapper">
+                    <div class="swiper-slide alerta-slide"
+                         data-url="{{ url_for('ofertas_page') }}">
+                        <img src="{{ url_for('static', filename='media/alerta1.gif') }}"
+                             alt="Alertas de vencimiento">
+                    </div>
+                    <div class="swiper-slide">
+                        <img src="{{ url_for('static', filename='media/oferta2.png') }}"
+                             alt="Oferta 2">
+                    </div>
+                    <div class="swiper-slide">
+                        <img src="{{ url_for('static', filename='media/oferta3.png') }}"
+                             alt="Oferta 3">
+                    </div>
+                    <div class="swiper-slide">
+                        <img src="{{ url_for('static', filename='media/oferta4.png') }}"
+                             alt="Oferta 4">
+                    </div>
+                </div>
+
+                <button type="button" class="swiper-button-next"></button>
+                <button type="button" class="swiper-button-prev"></button>
+                <div class="swiper-pagination"></div>
+            </div>
+
+            <!-- Grid de iconos -->
+            <section class="icon-grid">
+                <a href="{{ url_for('registrar_compra') }}" class="grid-item">
+                    <i class='bx bxs-checklist'></i>
+                    <span>Registrar producto</span>
+                </a>
+
+                <a href="{{ url_for('gestionar_proveedores') }}" class="grid-item">
+                    <i class='bx bxs-price-tag'></i>
+                    <span>Proveedores</span>
+                </a>
+
+                <a href="{{ url_for('deposito_page') }}" class="grid-item">
+                    <i class='bx bxs-package'></i>
+                    <span>Depósito</span>
+                </a>
+            </section>
+
+            <!-- Botón Alerta de Vencimientos -->
+            <div class="main-button-container js-navegacion"
+                 data-url="{{ url_for('alerta_vencimiento_page') }}">
+                <div class="top">
+                    <div class="favorite-card-content">
+                        <div class="favorite-card-text">
+                            <h2>Alerta de vencimientos</h2>
+                            <p>Aquí verás los productos próximos a vencer</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bottom"></div>
+            </div>
+
+            <!-- Botón Registro de Empleados -->
+            <div class="main-button-container js-navegacion"
+                 data-url="{{ url_for('lista_empleados') }}">
+                <div class="top">
+                    <div class="favorite-card-content">
+                        <div class="favorite-card-text">
+                            <h2>Registro de Empleados</h2>
+                            <p>Ingresa aquí para ver los detalles de los empleados</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bottom"></div>
+            </div>
+
+            <section class="block-title"></section>
+            <section class="block-coupons"></section>
+        </main>
+
+        <!-- Navbar -->
+        <div class="navbar">
+            <div class="effect"></div>
+
+            <button data-url="{{ url_for('main_screen') }}">
+                <i class='bx bx-home'></i>
+                <span>Inicio</span>
+            </button>
+
+            <button data-url="{{ url_for('producto_page') }}">
+                <i class='bx bxs-box'></i>
+                <span>Productos</span>
+            </button>
+
+            <button class="plus scanner-btn"
+                    data-url="{{ url_for('scanner_page') }}">
+                <i class='bx bxs-scan-barcode'></i>
+                <span>Escaner</span>
+            </button>
+
+            <button data-url="{{ url_for('precios_page') }}">
+                <i class='bx bxs-file-report'></i>
+                <span>Precios</span>
+            </button>
+
+            <button data-url="{{ url_for('ajustes_page') }}">
+                <i class='bx bxs-cog'></i>
+                <span>Ajustes</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" defer></script>
+    <script src="{{ url_for('static', filename='javascript/main.js') }}"
+            type="text/javascript"
+            defer></script>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const navButtons = document.querySelectorAll('.navbar button[data-url]');
+
+        navButtons.forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const url = btn.dataset.url;
+            if (url) {
+              window.location.href = url;
+            }
+          });
+        });
+
+        document.querySelectorAll('.alerta-slide').forEach((slide) => {
+          slide.addEventListener('click', function () {
+            const url = this.dataset.url;
+            if (!url) return;
+
+            // feedback visual
+            this.classList.add('is-pressed');
+
+            // pequeño delay para que se vea el efecto
+            setTimeout(() => {
+              window.location.href = url;
+            }, 150);
+          });
+        });
+      });
+    </script>
+</body>
+</html>

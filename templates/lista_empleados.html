@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/main.css') }}">
+    <link href='https://cdn.boxicons.com/fonts/basic/boxicons.min.css' rel='stylesheet'>
+    <title>Menu Principal | Gestion de Kioscos</title>
+    <style>
+        /* Contenedor principal del botón 3D (actúa como el <button>) */
+.main-button-container {
+    /* Toma la clase de estilo de tu tarjeta */
+    /* Aquí definimos el tamaño de la tarjeta/botón completo */
+    width: 90%; /* Ajusta al ancho de tu app móvil */
+    height: 120px; /* Altura de la tarjeta */
+    position: relative;
+    background: none;
+    outline: none;
+    border: none;
+    padding: 0;
+    margin: 20px auto; /* Centrar y separar */
+    cursor: pointer; /* Muestra el cursor de clic */
+}
+
+/* La superficie superior del botón (donde va el contenido) */
+.main-button-container .top {
+    width: 100%;
+    height: 100%;
+    /* Fondo claro de la superficie superior */
+    background: rgb(255, 255, 238); 
+    font-family: poppins, sans-serif;
+    color: rgb(36, 38, 34);
+    display: flex; /* Para centrar el contenido */
+    align-items: center;
+    justify-content: center;
+    border-radius: 7mm;
+    outline: 2px solid rgb(36, 38, 34); /* Borde negro */
+    transition: 0.2s; /* Animación para el desplazamiento */
+    position: relative;
+    overflow: hidden;
+}
+
+/* El fondo que crea la sombra y profundidad (bottom) */
+.main-button-container .bottom {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    /* Fondo más oscuro que la superficie superior */
+    background: rgb(229, 229, 199); 
+    top: 10px; /* Desplazamiento de 10px hacia abajo */
+    left: 0;
+    border-radius: 7mm;
+    outline: 2px solid rgb(36, 38, 34);
+    z-index: -1;
+}
+
+/* Efecto de presionar: Mueve la superficie superior (top) 10px hacia abajo */
+.main-button-container:active .top {
+    transform: translateY(10px);
+}
+
+/* Reglas opcionales del video (el efecto de "swipe" de luz, si lo quieres) */
+.main-button-container .top::before {
+    position: absolute;
+    content: "";
+    width: 15px;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.1);
+    transform: skewX(30deg);
+    left: -20px;
+    transition: 0.25s;
+}
+
+.main-button-container:active .top::before {
+    left: calc(100% + 20px);
+}
+
+.favorite-card-text h2 {
+    font-size: 30px;
+    justify-content: center;
+    margin: 0;
+}
+
+.favorite-card-text p {
+    font-size: 16px;
+    justify-content: center;
+    margin: 0;
+}
+
+/* tabla */
+.table{
+    width: 100%;
+    table-layout: fixed;
+}
+
+.table-empleados {
+    justify-content: center;
+    width: 90%;
+    margin: 20px auto;
+    border-collapse: collapse;
+    font-family: Arial, sans-serif;
+}
+
+.table-empleados th,
+.table-empleados td {
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+.table-empleados th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+}
+
+.list-header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding-bottom: 10px;
+}
+
+.btn-add-employee{
+    background-color: #367cff;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-add-employee:active{
+    background-color: #2a9bd9;
+}
+
+</style>
+</head>
+<body>
+    <div id="pc-blocker">
+        <h1>Lo sentimos</h1>
+        <p>Esta aplicación está optimizada solo para dispositivos móviles.</p>
+        <p>Por favor, ingrese desde su celular.</p>
+    </div>
+    <div id="mobile-app"> 
+<header class="app-header">
+    
+    <div class="header-icon">
+        <i class='bx bx-user-circle'></i>
+    </div>
+    
+    {% if session.loggedin %}
+    <div class="header-greeting">
+        ¡Hola, {{ session.nombre_persona }}!
+    </div>
+    {% else %}
+    <div class="header-greeting">
+        ¡Hola!
+    </div>
+    {% endif %}
+    
+    <div class="header-icon">
+        <i class='bx  bx-bell'  ></i> 
+    </div>
+</header>
+<main class="dashboard-body">
+
+    
+
+</section>
+
+   <div class="table-empleados">
+        <div class="list-header">
+            <h2>Lista de Empleados</h2>
+    <button class="btn-add-employee" onclick="window.location.href='/registrar_empleados'">Agregar Empleado</button>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Nombre</th>
+                <th>Teléfono</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+    </table>
+</div>
+
+        <section class="block-title"></section>
+
+        <section class="block-coupons"></section>
+
+    </main>
+
+    <div class="navbar">
+            <div class="effect"></div>
+
+            <button data-url="{{ url_for('main_screen') }}">
+                <i class='bx bx-home'></i>
+                <span>Inicio</span>
+            </button>
+
+            <button data-url="{{ url_for('producto_page') }}">
+                <i class='bx bxs-box'></i>
+                <span>Productos</span>
+            </button>
+
+            <button class="plus scanner-btn"
+                    data-url="{{ url_for('scanner_page') }}">
+                <i class='bx bxs-scan-barcode'></i>
+                <span>Escaner</span>
+            </button>
+
+            <button data-url="{{ url_for('precios_page') }}">
+                <i class='bx bxs-file-report'></i>
+                <span>Precios</span>
+            </button>
+
+            <button data-url="{{ url_for('ajustes_page') }}">
+                <i class='bx bxs-cog'></i>
+                <span>Ajustes</span>
+            </button>
+        </div>
+    </div>
+</body>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Seleccionamos el botón por su clase scanner-btn
+        const scannerBtn = document.querySelector('.scanner-btn'); 
+        
+        scannerBtn.addEventListener('click', function() {
+            // Obtenemos la URL de forma limpia del atributo data-url
+            const url = this.getAttribute('data-url'); 
+            window.location.href = url;
+        });
+        
+    });
+
+    document.addEventListener('DOMContentLoaded', function(){
+        function loadEmployees(){
+            fetch('/api/v1/empleados')
+            .then(response => {
+                if(!response.ok){
+                    throw new Error('Error en la solicitud: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                const tbody = document.querySelector('.table-empleados tbody');
+                tbody.innerHTML = ''; // Limpiar el contenido existente
+
+                if(data.length === 0){
+                    tbody.innerHTML = '<tr><td colspan="4">No hay empleados registrados.</td></tr>';
+                    return;
+                }
+                data.forEach((empleado, index) => {
+                    const row = tbody.insertRow();
+                    row.insertCell().textContent = index + 1;
+                    row.insertCell().textContent = empleado.nombre;
+                    row.insertCell().textContent = empleado.telefono;
+                    row.insertCell().textContent = empleado.estado;
+                });
+            })
+            .catch(error => {
+                console.error('Error al cargar los empleados:', error);
+                const tbody = document.querySelector('.table-empleados tbody');
+                tbody.innerHTML = '<tr><td colspan="4">Error al cargar los empleados.</td></tr>';
+            });
+        }
+        loadEmployees(); 
+    });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js">
+</script>
+<script src="{{ url_for('static', filename='javascript/main.js') }}" type="text/javascript"></script></html>
