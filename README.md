@@ -6,7 +6,7 @@
 [![Tech](https://img.shields.io/badge/Stack-Python%20|%20Flask%20|%20COBOL%20|%20Db2%20|%20Docker-blueviolet)](https://github.com/Flor125/kiosco-management-system-mainframe)
 [![Grade](https://img.shields.io/badge/Grade-9%2F10-brightgreen)](https://github.com/Flor125/kiosco-management-system-mainframe)
 
-> **🏆 Academic Context:** Only project from the 2022-2025 cohort fully implemented, deployed, and operational (vs theoretical proposals from other students). Developed throughout 2024-2025, defended December 16, 2025 with grade 9/10 at Universidad Nacional de Villa Mercedes.
+> **🏆 Academic Context:** Only project from the 2024-2025 cohort fully implemented, deployed, and operational (vs theoretical proposals from other students). Developed throughout 2024-2025, defended December 16, 2025 with grade 9/10 at Universidad Nacional de Villa Mercedes.
 > 
 > 📄 **Complete Academic Thesis:** [View PDF (56 pages)](./thesis_document/tesis.pdf) - Includes UML diagrams, use cases, detailed architecture, and operation logs.
 
@@ -263,7 +263,7 @@ This project was developed as an Associate Degree capstone project and includes 
   - Performance metrics
 
 - **Defense:** December 16, 2025 - Grade: 9/10
-- **Context:** Only project from 2022-2025 cohort fully implemented vs theoretical proposals
+- **Context:** Only project from 2024-2025 cohort fully implemented vs theoretical proposals
 
 ---
 
@@ -300,7 +300,7 @@ This project was developed for academic purposes. Code is available for review a
 [![Stack](https://img.shields.io/badge/Stack-Python%20|%20Flask%20|%20COBOL%20|%20Db2%20|%20Docker-blueviolet)](https://github.com/Flor125/kiosco-management-system-mainframe)
 [![Nota](https://img.shields.io/badge/Nota-9%2F10-brightgreen)](https://github.com/Flor125/kiosco-management-system-mainframe)
 
-> **🏆 Contexto Académico:** Único proyecto de la cohorte 2022-2025 completamente implementado, desplegado y funcionando (vs propuestas teóricas del resto de estudiantes). Desarrollado durante 2024-2025, defendido el 16 de diciembre de 2025 con nota 9/10 en la Universidad Nacional de Villa Mercedes.
+> **🏆 Contexto Académico:** Único proyecto de la cohorte 2024-2025 completamente implementado, desplegado y funcionando (vs propuestas teóricas del resto de estudiantes). Desarrollado durante 2024-2025, defendido el 16 de diciembre de 2025 con nota 9/10 en la Universidad Nacional de Villa Mercedes.
 > 
 > 📄 **Tesis Académica Completa:** [Ver PDF (56 páginas)](./thesis_document/tesis.pdf) - Incluye diagramas UML, casos de uso, arquitectura detallada y logs de operación.
 
@@ -557,7 +557,7 @@ Este proyecto fue desarrollado como tesis de tecnicatura e incluye documentació
   - Métricas de rendimiento
 
 - **Defensa:** 16 de diciembre de 2025 - Nota: 9/10
-- **Contexto:** Único proyecto de la cohorte 2022-2025 completamente implementado vs propuestas teóricas
+- **Contexto:** Único proyecto de la cohorte 2024-2025 completamente implementado vs propuestas teóricas
 
 ---
 
