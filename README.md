@@ -52,7 +52,7 @@ Due to compilation constraints in the s390x mainframe environment (GnuCOBOL with
 
 ## 🛠 Tech Stack
 
-* **Frontend:** HTML5, CSS3, JavaScript (QuaggaJS for barcode scanning)
+* **Frontend:** HTML5, CSS3, JavaScript (QuaggaJS for barcode scanning).
 * **Backend API:** Python 3.10, Flask, ibm_db driver
 * **Batch Processing:** COBOL (GnuCOBOL for s390x)
 * **Database:** IBM Db2 Community Edition (Dockerized on s390x)
