@@ -8,7 +8,7 @@
 
 > **🏆 Academic Context:** Only project from the 2024-2025 cohort fully implemented, deployed, and operational (vs theoretical proposals from other students). Developed throughout 2024-2025, defended December 16, 2025 with grade 9/10 at Universidad Nacional de Villa Mercedes.
 > 
-> 📄 **Complete Academic Thesis:** [View PDF (56 pages)](./thesis_document/tesis.pdf) - Includes UML diagrams, use cases, detailed architecture, and operation logs.
+> 📄 **Complete Academic Thesis:** [View PDF (56 pages)](./thesis_document/TESIS.pdf) - Includes UML diagrams, use cases, detailed architecture, and operation logs.
 
 ---
 
@@ -254,7 +254,7 @@ Universidad Nacional de Villa Mercedes (2022-2026)
 
 This project was developed as an Associate Degree capstone project and includes comprehensive academic documentation:
 
-- **Thesis Document:** [Complete PDF (56 pages)](./thesis_document/tesis.pdf)
+- **Thesis Document:** [Complete PDF (56 pages)](./thesis_document/TESIS.pdf)
   - UML diagrams (use cases, class diagrams, sequence diagrams)
   - Detailed architecture analysis
   - Implementation decisions and trade-offs
